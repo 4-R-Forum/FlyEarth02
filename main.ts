@@ -3,7 +3,6 @@ let roll = 0
 let pitch = 0
 let updown = 0
 serial.redirectToUSB()
-serial.writeNumber(19)
 basic.forever(function () {
     if (serial.readLine() == "req") {
         if (input.buttonIsPressed(Button.A)) {
@@ -17,6 +16,5 @@ basic.forever(function () {
         roll = input.rotation(Rotation.Roll)
         cmdString = "" + convertToText(updown) + "," + convertToText(pitch) + "," + convertToText(roll)
         serial.writeLine(cmdString)
-        serial.writeNumber(19)
     }
 })
