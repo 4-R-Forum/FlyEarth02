@@ -63,29 +63,53 @@ except Exception as e:
 i = 0
 l = datetime.datetime.now()
 
-while True :
+test = 0
+debug = False
+run = True
+
+while run :
   try: 
-    # get command 
+    # get command
+    req = "|".encode("utf-8")
+    port.writelines(bytes(req))
     cmd_string = port.readline().decode("utf-8")
     cmd_string = port.readline().decode("utf-8")
+    """
+    match test:
+      case 0:
+        cmd_string = "1, 0, 0, 0"
+      case 1:
+        cmd_string = "2, 30, 0, 0"
+      case 2:
+        cmd_string = "3, 30, -30, 0"
+      case 3:
+        cmd_string = "4, 0, 30, 0"
+    test += 1 
+    """
   except Exception as e:
     sys.stdout.write(str(e))
     break
   else:
-    #process
+    # start process
     m = ""
     i += 1
     n = datetime.datetime.now()
     e = n - l 
     l = n
     cmds = cmd_string.split(",")
-    if len(cmds) == 3  : #ignore more than 3 commands
+    if len(cmds) == 4  : #ignore more than 3 commands
       try : # set values
-        button = int(cmds[0])
+        counter = int(cmds[0])
+        run = (counter != -1)
+        button = int(cmds[3])
         pitch =  int(cmds[1])
         roll = int(cmds[2])
+
+        if int(cmds[0]) == -1:
+          run = False
       except: # use existing value
           pass
+    
     if button !=  0:  # look up /down 
       # one time change view
       # ignore pitch/roll this loop
@@ -99,6 +123,7 @@ while True :
         m += "LookDown"
       kd(k)
       action.perform()
+      sys.stdout.write(str(i) + " " +str(e)  + " " + cmd_string + " " + m + "\r\n")
     elif (pitch < 20
       and   pitch > -20
       and   roll < 20
@@ -112,16 +137,18 @@ while True :
         action.perform()
         m = "Level"
         sys.stdout.write(str(i) + " " +str(e)  + " " + cmd_string + " " + m + "\r\n")
-      # end of button and 
-      # level
-
+      # end of button and level
     else:  
-      # need to change direction, altitude, do one or the other this loop
+      # need to change direction or altitude, do one or the other this loop
       # direction first, repeat turn, no forward
+      ku(au) # stop going forward
       ku(pd) # stop going up
       ku(pu) # stop going down
-      if ((roll < 20) 
-      or   (roll <-20) ): # if roll right or left
+      ku(al) # stop going right
+      ku(ar) # stop going left
+      action.perform()
+      if ((roll > 20) 
+      or   (roll < -20) ): # if roll right or left
         # roll, go left = Right arrow
         kd(sh) # must shift
         # act on roll before pitch
@@ -135,10 +162,11 @@ while True :
           m ="GoLeft"
         kd(rk)
         ku(sh)
-        kd(au)
+        #kd(au)
         action.perform()
         sys.stdout.write(str(i) + " " +str(e)  + " " + cmd_string + " " + m + "\r\n")
       # end of roll
+      #start pitch
       else :
         # no roll
         # pitch, go down  = PageUp
@@ -155,12 +183,11 @@ while True :
           kd(au)
         action.perform()
         sys.stdout.write(str(i) + " " +str(e)  + " " + cmd_string + " " + m + "\r\n")
-      # end of pitch
-      # end of button,pitch,roll
+    # end of pitch
     # end of process
   # end of try read serial port
 # end of while loop
 
-port.Close()
+port.close()
 # end of flight
 

@@ -12,8 +12,8 @@ except:
 while True :
   try:
     # request command
-    #port.write(17) # XON
-    req = "|".encode("utf-8")
+    port.write(17) # XON
+    req = "req\r\n".encode("utf-8")
     port.writelines(bytes(req))
     # get command 
     cmd_string = port.readline().decode("utf-8") 
